@@ -5,6 +5,8 @@ import Button from './ui/Button';
 import { useAuth } from '../contexts/AuthContext';
 import { useClan, MAX_CLAN_MEMBERS } from '../hooks/useClan';
 import { supabase } from '../lib/supabase';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey, SystemProgram, Transaction, LAMPORTS_PER_SOL } from '@solana/web3.js';
 
 interface CreateClanPageProps {
   onOpenAuth: () => void;
@@ -23,6 +25,11 @@ type Tab = 'browse' | 'create';
 const CreateClanPage: React.FC<CreateClanPageProps> = ({ onOpenAuth }) => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { connection } = useConnection();
+  const { publicKey, sendTransaction } = useWallet();
+  const TREASURY_WALLET = "Cm9CXcgjhabyWhNu35vXbKYGFv8dSNd2KjPZrag67XAr";
+  const CLAN_COST_SOL = 0.1;
+
   const { createClan, joinClan, myClan, allClans, loading: clanLoading, browsing, fetchAllClans, error: clanError } = useClan();
   const [activeTab, setActiveTab] = useState<Tab>('browse');
   const [searchQuery, setSearchQuery] = useState('');
@@ -462,7 +469,30 @@ const CreateClanPage: React.FC<CreateClanPageProps> = ({ onOpenAuth }) => {
                     setDeploying(true);
                     setDeployError(null);
                     try {
-                      // Upload avatar if provided
+                      if (!publicKey) {
+                        throw new Error('Please connect your Solana wallet (top right) to pay the fee.');
+                      }
+
+                      // 1. Payment Transaction
+                      const transaction = new Transaction().add(
+                        SystemProgram.transfer({
+                          fromPubkey: publicKey,
+                          toPubkey: new PublicKey(TREASURY_WALLET),
+                          lamports: CLAN_COST_SOL * LAMPORTS_PER_SOL
+                        })
+                      );
+
+                      const signature = await sendTransaction(transaction, connection);
+
+                      // Wait for confirmation
+                      const latestBlockhash = await connection.getLatestBlockhash();
+                      await connection.confirmTransaction({
+                        signature,
+                        blockhash: latestBlockhash.blockhash,
+                        lastValidBlockHeight: latestBlockhash.lastValidBlockHeight
+                      });
+
+                      // 2. Upload avatar if provided
                       let avatarUrl = '';
                       if (avatarFile && user) {
                         const ext = avatarFile.name.split('.').pop() || 'png';
@@ -477,6 +507,7 @@ const CreateClanPage: React.FC<CreateClanPageProps> = ({ onOpenAuth }) => {
                         avatarUrl = urlData.publicUrl;
                       }
 
+                      // 3. Create Clan in DB
                       const clan = await createClan({
                         name: form.name,
                         tag: form.tag,
@@ -492,6 +523,7 @@ const CreateClanPage: React.FC<CreateClanPageProps> = ({ onOpenAuth }) => {
                         setTimeout(() => navigate('/war-room'), 2000);
                       }
                     } catch (err: any) {
+                      console.error("Deploy error:", err);
                       setDeployError(err.message || 'Failed to deploy clan');
                     } finally {
                       setDeploying(false);
@@ -499,9 +531,9 @@ const CreateClanPage: React.FC<CreateClanPageProps> = ({ onOpenAuth }) => {
                   }}
                 >
                   {deploying ? (
-                    <><Loader2 size={18} className="animate-spin mr-2" /> Deploying...</>
+                    <><Loader2 size={18} className="animate-spin mr-2" /> Processing Tx...</>
                   ) : (
-                    'Deploy Clan Contract'
+                    `Pay ${CLAN_COST_SOL} SOL & Deploy`
                   )}
                 </Button>
               )}
