@@ -89,78 +89,140 @@ const LeaderboardPage: React.FC = () => {
         </div>
 
         {/* Podium Section */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto items-end mb-24">
-          {Array.from({ length: 3 }).map((_, i) => {
-            const clan = sorted[i]; // Top 3 from sorted list
-            const isFirst = i === 0;
-            const medalColors = [
-              { border: 'border-yellow-500/50', bg: 'bg-yellow-500/10', text: 'text-yellow-500', label: '1ST' },
-              { border: 'border-zinc-400/50', bg: 'bg-zinc-400/10', text: 'text-zinc-400', label: '2ND' },
-              { border: 'border-orange-600/50', bg: 'bg-orange-600/10', text: 'text-orange-600', label: '3RD' },
-            ];
-            const medal = medalColors[i];
-            // Order: 2nd (left), 1st (center), 3rd (right)
-            const orderClass = isFirst ? 'md:order-2 md:-mb-12 z-10' : i === 1 ? 'md:order-1' : 'md:order-3';
+        <div className="flex flex-col md:flex-row justify-center items-end gap-6 max-w-5xl mx-auto mb-24 px-4">
 
-            if (!clan) {
-              return (
-                <div key={`empty-${i}`} className={`relative ${orderClass}`}>
-                  <div className="relative bg-zinc-900/40 backdrop-blur-sm border border-dashed border-white/5 rounded-3xl p-8 flex flex-col items-center text-center opacity-50">
-                    <div className="w-20 h-20 rounded-2xl border-2 border-dashed border-white/10 bg-black/50 flex items-center justify-center mb-6">
-                      <Shield className="w-8 h-8 text-zinc-700" />
-                    </div>
-                    <div className="text-sm font-bold text-zinc-600 mb-2">EMPTY SLOT</div>
-                  </div>
-                </div>
-              );
-            }
-
-            return (
-              <div key={clan.id} className={`relative group ${orderClass}`}>
-                <div className={`
-                        relative bg-zinc-900/60 backdrop-blur-xl border border-white/10 rounded-3xl p-8 flex flex-col items-center text-center
-                        transition-all duration-500 hover:-translate-y-2 hover:shadow-2xl hover:shadow-emerald-500/10
-                        ${isFirst ? 'bg-gradient-to-b from-zinc-800 to-black border-emerald-500/50 shadow-[0_0_50px_rgba(16,185,129,0.15)] scale-105' : 'hover:border-white/20'}
-                      `}>
-                  {isFirst && (
-                    <>
-                      <div className="absolute -top-20 inset-x-0 h-40 bg-emerald-500/20 blur-[60px] rounded-full pointer-events-none" />
-                      <Crown className="absolute -top-8 left-1/2 -translate-x-1/2 w-12 h-12 text-yellow-500 drop-shadow-[0_0_15px_rgba(250,204,21,0.6)] animate-bounce-slow" />
-                    </>
-                  )}
-
-                  <div className={`relative w-24 h-24 rounded-2xl border-2 ${medal.border} bg-zinc-900 flex items-center justify-center overflow-hidden mb-6 shadow-xl group-hover:scale-105 transition-transform duration-500`}>
+          {/* 2ND PLACE (Left) */}
+          <div className="order-2 md:order-1 w-full md:w-1/3 flex justify-center">
+            {sorted[1] ? (
+              <div className="relative group w-full max-w-[320px]">
+                <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/30 rounded-3xl p-6 flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 hover:border-zinc-500/50">
+                  <div className="relative w-20 h-20 rounded-2xl border-2 border-zinc-400/50 bg-zinc-900 flex items-center justify-center overflow-hidden mb-4 shadow-lg group-hover:scale-105 transition-transform duration-500">
                     <img
-                      src={clan.avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${clan.tag}&backgroundColor=10b981`}
-                      alt={clan.name}
+                      src={sorted[1].avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${sorted[1].tag}&backgroundColor=10b981`}
+                      alt={sorted[1].name}
                       className="w-full h-full object-cover"
                     />
                   </div>
-
-                  <div className={`${medal.bg} ${medal.text} px-4 py-1.5 rounded-full border ${medal.border} text-xs font-black mb-4 tracking-widest`}>
-                    {medal.label}
+                  <div className="bg-zinc-400/10 text-zinc-400 px-3 py-1 rounded-full border border-zinc-400/30 text-[10px] font-black mb-3 tracking-widest">
+                    2ND
                   </div>
+                  <h3 className="text-xl font-black text-white mb-1 tracking-tight truncate w-full">{sorted[1].name}</h3>
+                  <div className="text-xs font-mono text-zinc-500 mb-6">${sorted[1].tag}</div>
 
-                  <h3 className="text-2xl font-black text-white mb-1 tracking-tight">{clan.name}</h3>
-                  <div className="text-sm font-mono text-zinc-500 mb-8">${clan.tag}</div>
-
-                  <div className="w-full space-y-3 p-4 bg-black/40 rounded-2xl border border-white/5">
+                  <div className="w-full space-y-2 p-3 bg-black/40 rounded-xl border border-white/5">
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">ROI</span>
-                      <span className={`font-mono font-bold text-xl ${clan.roi_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>
-                        {formatROI(clan.roi_pct)}
-                      </span>
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold">ROI</span>
+                      <span className={`font-mono font-bold ${sorted[1].roi_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatROI(sorted[1].roi_pct)}</span>
                     </div>
                     <div className="w-full h-[1px] bg-white/5" />
                     <div className="flex justify-between items-center">
-                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Volume</span>
-                      <span className="text-cyan-400 font-mono font-bold text-sm">{formatVolume(clan.total_volume)}</span>
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold">Vol</span>
+                      <span className="text-cyan-400 font-mono font-bold text-xs">{formatVolume(sorted[1].total_volume)}</span>
                     </div>
                   </div>
                 </div>
               </div>
-            );
-          })}
+            ) : (
+              <div className="relative w-full max-w-[320px] opacity-30">
+                <div className="relative bg-zinc-900/40 border border-dashed border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center h-[300px]">
+                  <Shield className="w-12 h-12 text-zinc-700 mb-4" />
+                  <div className="text-xs font-bold text-zinc-600">EMPTY SLOT</div>
+                  <div className="mt-2 text-zinc-500 font-mono text-[10px]">2ND PLACE</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 1ST PLACE (Center - Elevated) */}
+          <div className="order-1 md:order-2 w-full md:w-1/3 flex justify-center relative z-10 md:-mb-12">
+            {sorted[0] ? (
+              <div className="relative group w-full max-w-[360px]">
+                {/* Glow effects */}
+                <div className="absolute -top-24 inset-x-0 h-48 bg-emerald-500/20 blur-[80px] rounded-full pointer-events-none" />
+
+                <div className="relative bg-gradient-to-b from-zinc-800 to-black border border-emerald-500/50 rounded-3xl p-8 flex flex-col items-center text-center shadow-[0_0_60px_rgba(16,185,129,0.15)] transform scale-105 transition-all duration-500 hover:-translate-y-2">
+                  <Crown className="absolute -top-10 left-1/2 -translate-x-1/2 w-14 h-14 text-yellow-500 drop-shadow-[0_0_20px_rgba(250,204,21,0.6)] animate-bounce-slow" />
+
+                  <div className="relative w-28 h-28 rounded-2xl border-2 border-yellow-500/60 bg-zinc-900 flex items-center justify-center overflow-hidden mb-6 shadow-2xl shadow-yellow-500/10 group-hover:scale-105 transition-transform duration-500">
+                    <img
+                      src={sorted[0].avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${sorted[0].tag}&backgroundColor=10b981`}
+                      alt={sorted[0].name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+
+                  <div className="bg-yellow-500/10 text-yellow-500 px-5 py-1.5 rounded-full border border-yellow-500/40 text-xs font-black mb-4 tracking-widest shadow-[0_0_15px_rgba(250,204,21,0.2)]">
+                    1ST CHAMPION
+                  </div>
+
+                  <h3 className="text-3xl font-black text-white mb-1 tracking-tight truncate w-full">{sorted[0].name}</h3>
+                  <div className="text-sm font-mono text-zinc-500 mb-8">${sorted[0].tag}</div>
+
+                  <div className="w-full space-y-3 p-4 bg-zinc-900/80 rounded-2xl border border-white/10">
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">ROI</span>
+                      <span className={`font-mono font-bold text-2xl ${sorted[0].roi_pct >= 0 ? 'text-emerald-400 drop-shadow-[0_0_8px_rgba(52,211,153,0.5)]' : 'text-red-400'}`}>{formatROI(sorted[0].roi_pct)}</span>
+                    </div>
+                    <div className="w-full h-[1px] bg-white/10" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold tracking-wider">Volume</span>
+                      <span className="text-cyan-400 font-mono font-bold text-lg drop-shadow-[0_0_5px_rgba(34,211,238,0.5)]">{formatVolume(sorted[0].total_volume)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="relative w-full max-w-[360px] opacity-40 md:-mb-12">
+                <div className="relative bg-zinc-900/60 border border-dashed border-emerald-500/30 rounded-3xl p-10 flex flex-col items-center justify-center h-[400px] shadow-[0_0_30px_rgba(16,185,129,0.05)]">
+                  <Crown className="w-16 h-16 text-zinc-700 mb-4" />
+                  <div className="text-sm font-bold text-zinc-500">NO CHAMPION</div>
+                  <div className="mt-2 text-zinc-600 font-mono text-xs">1ST PLACE</div>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* 3RD PLACE (Right) */}
+          <div className="order-3 md:order-3 w-full md:w-1/3 flex justify-center">
+            {sorted[2] ? (
+              <div className="relative group w-full max-w-[320px]">
+                <div className="relative bg-zinc-900/40 backdrop-blur-xl border border-zinc-700/30 rounded-3xl p-6 flex flex-col items-center text-center transition-all duration-500 hover:-translate-y-2 hover:border-zinc-500/50">
+                  <div className="relative w-20 h-20 rounded-2xl border-2 border-orange-600/50 bg-zinc-900 flex items-center justify-center overflow-hidden mb-4 shadow-lg group-hover:scale-105 transition-transform duration-500">
+                    <img
+                      src={sorted[2].avatar_url || `https://api.dicebear.com/7.x/shapes/svg?seed=${sorted[2].tag}&backgroundColor=10b981`}
+                      alt={sorted[2].name}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="bg-orange-600/10 text-orange-600 px-3 py-1 rounded-full border border-orange-600/30 text-[10px] font-black mb-3 tracking-widest">
+                    3RD
+                  </div>
+                  <h3 className="text-xl font-black text-white mb-1 tracking-tight truncate w-full">{sorted[2].name}</h3>
+                  <div className="text-xs font-mono text-zinc-500 mb-6">${sorted[2].tag}</div>
+
+                  <div className="w-full space-y-2 p-3 bg-black/40 rounded-xl border border-white/5">
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold">ROI</span>
+                      <span className={`font-mono font-bold ${sorted[2].roi_pct >= 0 ? 'text-emerald-400' : 'text-red-400'}`}>{formatROI(sorted[2].roi_pct)}</span>
+                    </div>
+                    <div className="w-full h-[1px] bg-white/5" />
+                    <div className="flex justify-between items-center">
+                      <span className="text-zinc-500 text-[10px] uppercase font-bold">Vol</span>
+                      <span className="text-cyan-400 font-mono font-bold text-xs">{formatVolume(sorted[2].total_volume)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="relative w-full max-w-[320px] opacity-30">
+                <div className="relative bg-zinc-900/40 border border-dashed border-white/10 rounded-3xl p-8 flex flex-col items-center justify-center h-[300px]">
+                  <Shield className="w-12 h-12 text-zinc-700 mb-4" />
+                  <div className="text-xs font-bold text-zinc-600">EMPTY SLOT</div>
+                  <div className="mt-2 text-zinc-500 font-mono text-[10px]">3RD PLACE</div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
 
