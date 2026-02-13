@@ -5,6 +5,7 @@ import { useWallet } from '@solana/wallet-adapter-react';
 import { useWalletModal } from '@solana/wallet-adapter-react-ui';
 import { useAuth } from '../contexts/AuthContext';
 import { useWalletAuth } from '../hooks/useWalletAuth';
+import logo from '../logo.png';
 
 interface NavbarProps {
   onOpenAuth: () => void;
@@ -78,7 +79,7 @@ const Navbar: React.FC<NavbarProps> = ({ onOpenAuth }) => {
           >
             <div className="relative">
               <div className="absolute inset-0 bg-emerald-500/50 blur-lg opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-              <img src="/logo.png" alt="Logo" className="relative z-10 w-12 h-12 object-contain transition-all duration-500" />
+              <img src={logo} alt="Logo" className="relative z-10 w-12 h-12 object-contain transition-all duration-500" />
             </div>
             <span className="font-bold tracking-tight text-white group-hover:text-emerald-100 transition-colors">
               TrenchAlliance
